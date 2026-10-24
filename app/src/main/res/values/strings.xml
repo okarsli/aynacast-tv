@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AynaCast TV</string>
+    <string name="app_name">AynaCast</string>
 
     <!-- Notification -->
     <string name="notification_channel">AynaCast TV</string>
-    <string name="notification_title">AynaCast TV çalışıyor</string>
-    <string name="notification_text">AirPlay bağlantısı bekleniyor</string>
-    <string name="notification_pin_title">AirPlay PIN Required</string>
+    <string name="notification_title">AynaCast is running</string>
+    <string name="notification_text">Waiting for a connection</string>
+    <string name="notification_pin_title">Connection PIN required</string>
     <string name="notification_pin_text">PIN: %1$s</string>
     <string name="stop_service">Stop</string>
 
@@ -30,6 +30,10 @@
     <string name="local_network_label">Nearby devices access needed</string>
     <string name="local_network_desc">Allow access to nearby devices so AirPlay devices can find and connect to this device</string>
     <string name="unknown_track">Unknown</string>
+    <string name="brand_tagline">Your screen, beautifully at home.</string>
+    <string name="home_headline">A bigger view, in seconds</string>
+    <string name="home_connect_instruction">On iPhone: Control Center → Screen Mirroring → %1$s</string>
+    <string name="home_start_instruction">Start the receiver below, then choose %1$s on your iPhone.</string>
 
     <!-- Content descriptions -->
     <string name="cd_pip">Picture-in-Picture</string>
@@ -68,7 +72,7 @@
     <string name="scale_hundred_percent">100%</string>
 
     <!-- Dialogs -->
-    <string name="dialog_pin_title">AirPlay PIN</string>
+    <string name="dialog_pin_title">Connection PIN</string>
     <string name="btn_ok">OK</string>
 
     <!-- Logs screen -->

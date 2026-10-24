@@ -180,7 +180,11 @@ http_handler_set_property(raop_conn_t *conn,
     */
 
     airplay_video_t *airplay_video = (airplay_video_t *) hls_get_current_video(raop);
-    assert(airplay_video);
+    if (!airplay_video) {
+        logger_log(raop->logger, LOGGER_WARNING,
+                   "Ignoring setProperty request without an active HLS video: %s", property);
+        goto post_error;
+    }
     if (!strcmp(property, "selectedMediaArray")) {
         /* verify that this request contains a binary plist*/
         char *header_str = NULL;

@@ -1,18 +1,33 @@
 # AynaCast TV
 
-An Android AirPlay receiver for Android TVs, TV boxes, and tablets. iPhone users connect through the built-in **Screen Mirroring** control; no companion iPhone app is required.
+An experimental AirPlay screen-mirroring receiver for Android TV, TV boxes, and tablets. On iPhone, open **Control Center → Screen Mirroring**; no companion iPhone app is required.
 
-Türkçe kullanım ve cihaz davranışı: [README-TURKISH.md](README-TURKISH.md).
+**Türkçe:** [README-TURKISH.md](README-TURKISH.md) · **Download:** [latest v1.0.0 debug APK](https://github.com/okarsli/aynacast-tv/releases/download/v1.0.0-debug/AynaCast-TV-1.0.0-debug.apk) · [Release notes](RELEASE_NOTES.md)
 
-## Development status
+## What it does
 
-This is a development build. The APK has been built, but real iPhone-to-TV streaming has not yet been verified on the target TV. HDR output, 8K, and end-to-end latency are not claimed as tested.
+- Advertises an AirPlay receiver that iPhone users can select from the built-in Screen Mirroring list.
+- Includes Turkish strings and uses Android's selected app language/locale where available; English is the fallback.
+- Provides receiver, video, audio, and per-client profile settings. Reported resolution and playback depend on the sender, Android decoder, device, and display.
+- Does not upscale video or claim unsupported 8K, 120 Hz, or HDR output.
 
-The receiver adapts to capabilities reported by the Android device and the negotiated AirPlay stream. It does not upscale video. The achievable resolution and HDR mode depend on the sender, receiver hardware/decoder, and display. DRM-protected content such as Apple TV app video is not supported.
+## Status and known limitations
 
-## Build
+This is a **debug / early-test release**, not a stable or broadly validated receiver. The APK installs and launches on an Android 11 TV, and an earlier test session connected an iPhone. The latest build has not yet been re-tested for AirPlay playback after its installation. Codec, frame rate, end-to-end latency, and HDR output have not been measured for this release.
 
-Clone with the remaining native dependencies, then build the debug APK:
+Reported issues from earlier manual use include audio arriving late after volume changes and transient black screens or reconnects when moving between some short videos. DRM-protected video (including Netflix playback) may show a black screen; protected video playback is not supported. See [the release notes](RELEASE_NOTES.md) for the current test status.
+
+## Install and connect
+
+1. Download the debug APK from the [v1.0.0-debug release](https://github.com/okarsli/aynacast-tv/releases/tag/v1.0.0-debug) and install it on a compatible Android device.
+2. Open AynaCast TV and start the receiver. Put the Android device and iPhone on the same local network.
+3. On iPhone, open **Control Center → Screen Mirroring** and choose **AynaCast TV**.
+
+Android may ask you to allow installation from the app used to open the APK. Only install APKs you trust. The application ID is `com.oguzhan.airplaytv`.
+
+## Build from source
+
+Clone the project with its native dependencies, then build a debug APK with JDK 21 and the Android SDK/NDK configured:
 
 ```sh
 git clone --recurse-submodules https://github.com/okarsli/aynacast-tv.git
@@ -20,10 +35,8 @@ cd aynacast-tv
 ./gradlew assembleDebug
 ```
 
-On Windows, run `gradlew.bat assembleDebug`. The APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
+The APK is written to `app/build/outputs/apk/debug/app-debug.apk`. The GitHub Actions workflow builds on Ubuntu. A clean Windows source build has not been validated as a release workflow.
 
-The modified UxPlay source is included directly in this repository. FFmpeg, libplist, and OpenSSL CMake remain Git submodules.
+## Upstream, license, and trademarks
 
-## Upstream and license
-
-AynaCast TV is based on [jqssun/android-airplay-server](https://github.com/jqssun/android-airplay-server) and UxPlay, with AynaCast-specific changes. The Android receiver is licensed under GPL-3.0; see [LICENSE](LICENSE) and the license files in native dependencies.
+AynaCast TV is based on [jqssun/android-airplay-server](https://github.com/jqssun/android-airplay-server) and [UxPlay](https://github.com/antimof/UxPlay), with AynaCast-specific changes. The Android receiver is licensed under GPL-3.0; see [LICENSE](LICENSE) and the license files included with native dependencies. AirPlay, iPhone, and Apple are trademarks of Apple Inc. AynaCast TV is an independent project and is not affiliated with or endorsed by Apple.

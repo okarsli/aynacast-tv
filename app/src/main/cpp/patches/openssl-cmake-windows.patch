@@ -1,0 +1,55 @@
+diff --git a/cmake/BuildOpenSSL.cmake b/cmake/BuildOpenSSL.cmake
+index 8091a72..0b603e9 100644
+--- a/cmake/BuildOpenSSL.cmake
++++ b/cmake/BuildOpenSSL.cmake
+@@ -50,0 +51 @@ if (EXISTS ${OPENSSL_PREFIX})
++    add_custom_target(openssl)
+@@ -176,0 +178,7 @@ else()
++    # Do not regenerate the parent Ninja build from inside its own install step on Windows.
++    # Ninja already owns its build log while the ExternalProject is running.
++    set(OPENSSL_RECONFIGURE_COMMAND)
++    if(NOT CMAKE_HOST_WIN32)
++        list(APPEND OPENSSL_RECONFIGURE_COMMAND COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} ${CMAKE_BINARY_DIR})
++    endif()
++
+@@ -197 +205 @@ else()
+-        COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} ${CMAKE_BINARY_DIR}                    # force CMake-reload
++        ${OPENSSL_RECONFIGURE_COMMAND}
+diff --git a/scripts/building_env.py b/scripts/building_env.py
+index 8509d82..30c5b46 100644
+--- a/scripts/building_env.py
++++ b/scripts/building_env.py
+@@ -48,0 +49,11 @@ env_sep = ';' if args.os == 'WIN32' else ':'
++def msys_path(path):
++    path = path.replace('\\', '/')
++    match = re.match(r'^([A-Za-z]):/(.*)$', path)
++    if match:
++        return '/' + match.group(1).lower() + '/' + match.group(2)
++    return path
++
++def msys_path_list(value):
++    parts = re.split(r'(?<=/):(?=[A-Za-z]:/)', value.replace('\\', '/'))
++    return ':'.join(msys_path(part) for part in parts)
++
+@@ -52,0 +64,4 @@ def add_env(k, v):
++        if os.name == 'nt' and args.os != 'WIN32':
++            if ';' in env[k]:
++                env[k] = ':'.join(msys_path(part) for part in env[k].split(';') if part)
++            v = msys_path(v)
+@@ -67 +82 @@ if args.make is not None and len(args.make) > 0:
+-if args.os == 'WIN32':
++if args.os == 'WIN32' or (args.bash is not None and len(args.bash) > 0):
+@@ -70 +85 @@ if args.os == 'WIN32':
+-elif args.os == 'LINUX_CROSS_ANDROID':
++if args.os == 'LINUX_CROSS_ANDROID':
+@@ -79,0 +95,4 @@ elif args.os == 'LINUX_CROSS_ANDROID':
++        if k == 'PATH' and os.name == 'nt':
++            v = msys_path_list(v)
++        elif k in ('ANDROID_NDK', 'ANDROID_NDK_ROOT') and os.name == 'nt':
++            v = msys_path(v)
+@@ -90 +109 @@ proc = None
+-if args.os == 'WIN32':
++if args.bash is not None and len(args.bash) > 0:
+@@ -92 +111 @@ if args.os == 'WIN32':
+-    proc = Popen(bash, env=env, cwd=args.cwd, stdin=PIPE, universal_newlines=True)
++    proc = Popen([args.bash], env=env, cwd=args.cwd, stdin=PIPE, universal_newlines=True)

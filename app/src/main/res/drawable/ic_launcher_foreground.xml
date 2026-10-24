@@ -7,29 +7,29 @@
     <!-- Wireless signal -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#7A83FF"
+        android:strokeColor="#A69BFF"
         android:strokeWidth="3.5"
         android:strokeLineCap="round"
         android:pathData="M34,29 Q54,10 74,29" />
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#4AE9D2"
+        android:strokeColor="#63E4CF"
         android:strokeWidth="3.5"
         android:strokeLineCap="round"
         android:pathData="M42,34 Q54,23 66,34" />
     <path
-        android:fillColor="#4AE9D2"
+        android:fillColor="#63E4CF"
         android:pathData="M52,36a2,2 0,1 0,4 0a2,2 0,1 0,-4 0" />
 
     <!-- TV body and screen -->
     <path
-        android:fillColor="#F1F6FF"
+        android:fillColor="#EEF3FC"
         android:pathData="M25,40h58a5,5 0,0 1,5 5v30a5,5 0,0 1,-5 5h-58a5,5 0,0 1,-5 -5v-30a5,5 0,0 1,5 -5z" />
     <path
-        android:fillColor="#1A2A4C"
+        android:fillColor="#111C30"
         android:pathData="M29,45h50v30h-50z" />
     <path
-        android:fillColor="#4AE9D2"
+        android:fillColor="#63E4CF"
         android:pathData="M49,50l17,10 -17,10z" />
 
     <!-- Stand -->

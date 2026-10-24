@@ -30,6 +30,19 @@ endif()
 
 set(FFMPEG_INSTALL ${CMAKE_BINARY_DIR}/ffmpeg)
 
+# FFmpeg's configure script and generated Makefiles require a POSIX shell on Windows.
+if(CMAKE_HOST_WIN32)
+    find_program(_ffmpeg_bash NAMES bash.exe bash REQUIRED)
+    find_program(_ffmpeg_make NAMES make.exe make REQUIRED)
+    set(_ffmpeg_configure_command ${_ffmpeg_bash} <SOURCE_DIR>/configure)
+    set(_ffmpeg_build_command ${_ffmpeg_make} -j${_ffmpeg_jobs})
+    set(_ffmpeg_install_command ${_ffmpeg_make} install)
+else()
+    set(_ffmpeg_configure_command <SOURCE_DIR>/configure)
+    set(_ffmpeg_build_command make -j${_ffmpeg_jobs})
+    set(_ffmpeg_install_command make install)
+endif()
+
 # instrument ffmpeg with the same sanitizers; built with --disable-asm
 set(_ffmpeg_sanitize "")
 if(SANITIZE)
@@ -43,7 +56,7 @@ ExternalProject_Add(ffmpeg_ep
     DOWNLOAD_COMMAND ""
     PREFIX ${CMAKE_BINARY_DIR}/ffmpeg-ep
     INSTALL_DIR ${FFMPEG_INSTALL}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure
+    CONFIGURE_COMMAND ${_ffmpeg_configure_command}
         --prefix=<INSTALL_DIR>
         --target-os=android --arch=${_ffmpeg_arch} ${_ffmpeg_cpu} --enable-cross-compile
         --cc=${_ffmpeg_tc}/${_ffmpeg_triple}${AIRPLAY_ANDROID_API}-clang
@@ -55,8 +68,8 @@ ExternalProject_Add(ffmpeg_ep
         --disable-all --disable-debug --disable-network --disable-autodetect
         --enable-avcodec --enable-decoder=alac,aac --enable-static --disable-shared
         ${_ffmpeg_sanitize}
-    BUILD_COMMAND make -j${_ffmpeg_jobs}
-    INSTALL_COMMAND make install
+    BUILD_COMMAND ${_ffmpeg_build_command}
+    INSTALL_COMMAND ${_ffmpeg_install_command}
     BUILD_BYPRODUCTS ${FFMPEG_INSTALL}/lib/libavcodec.a ${FFMPEG_INSTALL}/lib/libavutil.a
     LOG_CONFIGURE TRUE
     LOG_BUILD TRUE

@@ -3,6 +3,9 @@ name: Generate APK
 env:
   main_project_module: app
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -13,6 +16,7 @@ on:
 
 jobs:
   build:
+    if: ${{ !contains(github.ref_name, '-debug') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -31,10 +35,13 @@ jobs:
           cache: "gradle"
 
       - name: Build
+        env:
+          STORE: ${{ secrets.STORE }}
+          LOCAL: ${{ secrets.LOCAL }}
         run: |
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
-          echo ${{ secrets.STORE }} | base64 -d > upload.jks
-          echo ${{ secrets.LOCAL }} | base64 -d > local.properties
+          printf '%s' "$STORE" | base64 -d > upload.jks
+          printf '%s' "$LOCAL" | base64 -d > local.properties
           chmod +x ./gradlew;
           ./gradlew assembleRelease bundleRelease --stacktrace
           rm upload.jks local.properties

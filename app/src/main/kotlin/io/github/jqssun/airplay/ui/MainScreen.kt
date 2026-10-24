@@ -620,8 +620,17 @@ private fun OverviewContent(
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    brush = Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
             val connecting = state == ServerState.RUNNING && connections > 0 &&
@@ -634,21 +643,65 @@ private fun OverviewContent(
                 }
                 if (state != ServerState.RUNNING || connections == 0) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = if (connections > 0) Icons.Default.CastConnected else Icons.Default.Cast,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                        Spacer(Modifier.height(12.dp))
+                        Surface(
+                            modifier = Modifier.size(104.dp),
+                            shape = RoundedCornerShape(30.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            tonalElevation = 10.dp,
+                            shadowElevation = 10.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(88.dp)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(18.dp))
                         Text(
-                            text = if (grant) stringResource(R.string.local_network_desc) else when (state) {
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.home_headline),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.brand_tagline),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = if (grant) stringResource(R.string.local_network_label) else when (state) {
                                 ServerState.STOPPED -> stringResource(R.string.server_stopped)
                                 ServerState.RUNNING -> stringResource(R.string.waiting_for_connection)
                                 ServerState.ERROR -> stringResource(R.string.error_starting_server)
                             },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = if (grant || state == ServerState.ERROR) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = when {
+                                grant -> stringResource(R.string.local_network_desc)
+                                state == ServerState.RUNNING -> stringResource(R.string.home_connect_instruction, serverName)
+                                else -> stringResource(R.string.home_start_instruction, serverName)
+                            },
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
@@ -706,10 +759,12 @@ private fun OverviewContent(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -718,7 +773,7 @@ private fun OverviewContent(
                     Column {
                         Text(
                             text = serverName,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
                         Spacer(Modifier.height(2.dp))

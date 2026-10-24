@@ -11,7 +11,12 @@ val localProps = Properties().apply {
     rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
 }
 
-val allAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+val allAbis = providers.gradleProperty("targetAbis").orNull
+    ?.split(',')
+    ?.map { it.trim() }
+    ?.filter { it.isNotEmpty() }
+    ?.takeIf { it.isNotEmpty() }
+    ?: listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 
 android {
     namespace = "io.github.jqssun.airplay"
@@ -92,8 +97,13 @@ android {
 
 tasks.register("applyUxplayPatches") {
     doLast {
+        val uxplayRoot = file("src/main/cpp/third_party/UxPlay")
+        if (!uxplayRoot.resolve(".git").exists()) {
+            logger.lifecycle("Skipping UxPlay patch series because UxPlay is checked in as source files.")
+            return@doLast
+        }
         fun git(vararg args: String): String {
-            val proc = ProcessBuilder("git", "-C", "$projectDir/src/main/cpp/third_party/UxPlay", *args)
+            val proc = ProcessBuilder("git", "-C", uxplayRoot.absolutePath, *args)
                 .redirectErrorStream(true).start()
             val out = proc.inputStream.bufferedReader().readText()
             check(proc.waitFor() == 0) { "git ${args.joinToString(" ")} failed:\n$out" }
@@ -107,8 +117,43 @@ tasks.register("applyUxplayPatches") {
     }
 }
 
+tasks.register("applyOpenSslCmakePatches") {
+    doLast {
+        val opensslRoot = file("src/main/cpp/third_party/openssl-cmake")
+        val patch = file("src/main/cpp/patches/openssl-cmake-windows.patch")
+
+        val revisionProc = ProcessBuilder("git", "-C", opensslRoot.absolutePath, "rev-parse", "HEAD")
+            .redirectErrorStream(true).start()
+        val revision = revisionProc.inputStream.bufferedReader().readText().trim()
+        check(revisionProc.waitFor() == 0 && revision == "4edd36a8dab5f85a8f92650b5bdf6e0cab13aab8") {
+            "OpenSSL CMake submodule revision does not match the patch base: $revision"
+        }
+
+        fun gitApply(vararg args: String): Pair<Int, String> {
+            val proc = ProcessBuilder("git", "-C", opensslRoot.absolutePath, "apply", *args)
+                .redirectErrorStream(true).start()
+            val out = proc.inputStream.bufferedReader().readText()
+            return proc.waitFor() to out
+        }
+
+        val forward = gitApply("--unidiff-zero", "--check", patch.absolutePath)
+        if (forward.first == 0) {
+            val applied = gitApply("--unidiff-zero", patch.absolutePath)
+            check(applied.first == 0) { "Could not apply OpenSSL CMake patch:\n${applied.second}" }
+        } else {
+            val reverse = gitApply("--unidiff-zero", "--reverse", "--check", patch.absolutePath)
+            check(reverse.first == 0) {
+                "OpenSSL CMake source does not match the expected patch base:\n${forward.second}"
+            }
+            logger.lifecycle("OpenSSL CMake host-compatibility patch is already applied.")
+        }
+    }
+}
+
 tasks.configureEach {
-    if (name.startsWith("configureCMake")) dependsOn("applyUxplayPatches")
+    if (name.startsWith("configureCMake")) {
+        dependsOn("applyUxplayPatches", "applyOpenSslCmakePatches")
+    }
 }
 
 dependencies {
